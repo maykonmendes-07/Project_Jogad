@@ -1,11 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 
 module.exports = {
     addPlayerPage: (req, res) => {
-        res.render('add-player.ejs', {
-            title: "Welcome to Socka | Add a new player",
-            message: ''
-        });
+        res.render('add-player.ejs', { title: "Welcome to Socka | Add a new player", message: '' });
     },
 
     addPlayer: (req, res) => {
@@ -20,9 +18,8 @@ module.exports = {
         let number = req.body.number;
         let username = req.body.username;
         let uploadedFile = req.files.image;
-        let image_name = uploadedFile.name;
         let fileExtension = uploadedFile.mimetype.split('/')[1];
-        image_name = username + '.' + fileExtension;
+        let image_name = username + '.' + fileExtension;
 
         let usernameQuery = "SELECT * FROM `players` WHERE user_name = '" + username + "'";
 
@@ -32,19 +29,25 @@ module.exports = {
             }
             if (result.length > 0) {
                 message = 'Username already exists';
-                return res.render('add-player.ejs', {
-                    message,
-                    title: "Welcome to Socka | Add a new player"
-                });
+                return res.render('add-player.ejs', { message, title: "Welcome to Socka | Add a new player" });
             } else {
-                // Check the filetype before uploading it
                 if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/jpeg' || uploadedFile.mimetype === 'image/gif') {
-                    // Upload the file to the /public/assets/img directory
-                    uploadedFile.mv(`public/assets/img/${image_name}`, (err) => {
+
+                    // Caminho absoluto correto
+                    let uploadDir = path.join(process.cwd(), 'public', 'assets', 'img');
+                    let uploadPath = path.join(uploadDir, image_name);
+
+
+                    // Força o Node.js a criar as pastas se elas não existirem no Windows
+                    if (!fs.existsSync(uploadDir)) {
+                        fs.mkdirSync(uploadDir, { recursive: true });
+                    }
+
+                    // Move o arquivo após garantir que a pasta existe
+                    uploadedFile.mv(uploadPath, (err) => {
                         if (err) {
                             return res.status(500).send(err);
                         }
-                        // Send the player's details to the database
                         let query = "INSERT INTO `players` (first_name, last_name, position, number, image, user_name) VALUES ('" + first_name + "', '" + last_name + "', '" + position + "', '" + number + "', '" + image_name + "', '" + username + "')";
                         db.query(query, (err, result) => {
                             if (err) {
@@ -53,12 +56,10 @@ module.exports = {
                             return res.redirect('/');
                         });
                     });
+
                 } else {
                     message = "Invalid File format. Only 'gif', 'jpeg' and 'png' images are allowed.";
-                    return res.render('add-player.ejs', {
-                        message,
-                        title: "Welcome to Socka | Add a new player"
-                    });
+                    return res.render('add-player.ejs', { message, title: "Welcome to Socka | Add a new player" });
                 }
             }
         });
@@ -71,11 +72,7 @@ module.exports = {
             if (err) {
                 return res.status(500).send(err);
             }
-            return res.render('edit-player.ejs', {
-                title: "Edit Player",
-                player: result[0],
-                message: ''
-            });
+            return res.render('edit-player.ejs', { title: "Edit Player", player: result[0], message: '' });
         });
     },
 
@@ -85,7 +82,6 @@ module.exports = {
         let last_name = req.body.last_name;
         let position = req.body.position;
         let number = req.body.number;
-
         let query = "UPDATE `players` SET `first_name` = '" + first_name + "', `last_name` = '" + last_name + "', `position` = '" + position + "', `number` = '" + number + "' WHERE `players`.`id` = '" + playerId + "'";
         db.query(query, (err, result) => {
             if (err) {
@@ -109,8 +105,9 @@ module.exports = {
             }
 
             let image = result[0].image;
-            fs.unlink(`public/assets/img/${image}`, (err) => {
-                // Se a imagem não existir fisicamente no servidor, o fluxo continua para deletar do banco
+            let deletePath = path.join(process.cwd(), 'public', 'assets', 'img', image);
+
+            fs.unlink(deletePath, (err) => {
                 if (err && err.code !== 'ENOENT') {
                     return res.status(500).send(err);
                 }

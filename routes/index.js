@@ -7,7 +7,7 @@ module.exports = {
             if (err) return res.redirect('/');
 
             res.render('index.ejs', {
-                title: "Welcome to Socka | View Players",
+                title: "Jogadores",
                 players: result
             });
         });

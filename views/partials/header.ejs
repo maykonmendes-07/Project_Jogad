@@ -10,6 +10,12 @@
     <title><%= title %></title>
 </head>
 <style>
+    
+    body{
+        background-color: black;
+        color:rgb(72, 255, 72);
+
+    }
     .table-wrapper {
         margin-top: 50px;
     }
@@ -22,11 +28,18 @@
     .add-player-form {
         margin-top: 50px;
     }
+    body span.navbar-brand {
+        color:rgb(72, 255, 72); 
+    }
+    nav.navbar a {
+    color: #00ff40 !important; /* Substitua pelo código da cor que você quiser */
+}
+
 </style>
 <body>
 <div class="page-wrapper">
-    <nav class="navbar navbar-light bg-light">
-        <span class="navbar-brand mb-0 h1" ><a href="/">Socka Players</a></span>
-        <a class="float-right" href="/add" title="Add a New Player">Add a Player</a>
+    <nav class="navbar navbar-dark" style="background-color: #1e1e24;">
+        <span class="navbar-brand mb-0 h1"><a class="text-Gren" href="/">Jogadores</a></span>
+        <a class="float-right text-white" href="/add" title="Add a New Player">Add a Player</a>
     </nav>
     
